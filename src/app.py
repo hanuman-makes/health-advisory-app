@@ -108,8 +108,8 @@ html, body, [class*="css"] {
   background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
 }
 
-[data-testid="stHeader"]  { background: transparent !important; display: none !important; }
-[data-testid="stToolbar"] { display: none !important; }
+[data-testid="stHeader"]  { display: none !important; height: 0px !important; overflow: hidden !important; position: absolute !important; }
+[data-testid="stToolbar"] { display: none !important; height: 0px !important; }
 [data-testid="stDecoration"] { display: none !important; }
 footer { visibility: hidden !important; display: none !important; }
 #MainMenu { visibility: hidden !important; display: none !important; }
@@ -568,7 +568,8 @@ div[id^="viewerBadge"] { display: none !important; visibility: hidden !important
 
 /* ────────────────── Mobile Responsiveness Fixes ────────────────── */
 @media (max-width: 768px) {
-  .hero { padding: 32px 20px 24px; border-radius: 20px; }
+  [data-testid="block-container"] { padding-top: 1rem !important; }
+  .hero { padding: 24px 16px 20px; border-radius: 16px; }
   .hero-eyebrow { font-size: 0.6rem; padding: 4px 12px; }
   .hero-title { font-size: 2rem !important; white-space: nowrap; letter-spacing: -1px !important; }
   .hero-badge { padding: 5px 10px; font-size: 0.68rem; }
