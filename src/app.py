@@ -192,8 +192,8 @@ div[id^="viewerBadge"] { display: none !important; visibility: hidden !important
 }
 
 .hero-title {
-  font-family:'Syne',sans-serif; font-size:clamp(2.6rem,5.5vw,4rem); font-weight:800;
-  line-height:1.0; letter-spacing:-2.5px;
+  font-family:'Syne',sans-serif; font-size:clamp(2.2rem, 10vw, 4rem); font-weight:800;
+  line-height:1.0; letter-spacing:-1.5px;
   background:linear-gradient(135deg,#ffffff 15%,#b8d5ff 50%,var(--cyan) 88%);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
   margin:0 0 12px; display:block;
@@ -562,6 +562,20 @@ div[id^="viewerBadge"] { display: none !important; visibility: hidden !important
 /* ────────────────── Progress bar override ────────────────── */
 [data-testid="stProgressBar"] > div > div {
   background: linear-gradient(90deg, var(--cyan), var(--blue)) !important;
+}
+
+/* ────────────────── Mobile Responsiveness Fixes ────────────────── */
+@media (max-width: 768px) {
+  .hero { padding: 32px 20px 24px; border-radius: 20px; }
+  .hero-eyebrow { font-size: 0.6rem; padding: 4px 12px; }
+  .hero-badge { padding: 5px 10px; font-size: 0.68rem; }
+  .hero-badge-row { gap: 6px; }
+  .sec-title { font-size: 1.25rem; }
+  .gpanel { padding: 20px 16px; border-radius: 16px; }
+  .mcard { padding: 20px 14px 18px; }
+  .mcard-val { font-size: 1.8rem; }
+  .result-condition, .result-advice { padding: 18px 20px; }
+  [data-testid="stTabs"] button[role="tab"] { padding: 8px 16px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
