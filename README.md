@@ -14,11 +14,15 @@ An intelligent, low-cost, accessible system that offers safe, non-prescriptive h
 
 ## Features
 
-1. **AI-Powered Symptom Analysis** - Rule-based + ML hybrid approach
-2. **Multilingual Support** - English, Hindi, Kannada
-3. **Voice Input** - Hands-free symptom entry
-4. **Medicine Reminders** - Schedule and receive timely alerts
-5. **Clean Streamlit UI** - Responsive web interface
+1. **🩺 AI-Powered Symptom Analysis** - ML-powered disease prediction across 41 conditions and 132 symptoms.
+2. **🌐 Multilingual Support** - English, Hindi, and Kannada (auto-detected and translated).
+3. **🎤 Voice Input** - Hands-free symptom entry via speech recognition (with file upload fallback).
+4. **💊 Smart Medicine Reminders** - Persistent scheduling backed by SQLite. Includes an active alarm system that triggers browser chimes, visual banners, and system notifications when it's time to take your medicine.
+5. **📊 Live Health Dashboard** - Tracks medication adherence with an animated donut chart and KPIs for taken/missed/scheduled doses.
+6. **🥗 Diet Planner** - Condition-specific nutritional guidance (what to eat and avoid) based on predicted diseases.
+7. **📅 Doctor Finder** - Local doctor search integration with Google Maps.
+8. **🔒 Privacy-First** - All data is stored locally with zero cloud tracking.
+9. **✨ Beautiful Streamlit UI** - Responsive, mobile-friendly interface with quick-select symptom chips and animated scan-lines.
 
 ## Technology Stack
 
