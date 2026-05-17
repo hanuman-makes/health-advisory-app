@@ -566,7 +566,10 @@ div[id^="viewerBadge"] { display: none !important; visibility: hidden !important
 
 /* ────────────────── Mobile Responsiveness Fixes ────────────────── */
 @media (max-width: 768px) {
-  [data-testid="block-container"] { padding-top: 1rem !important; }
+  [data-testid="block-container"], [data-testid="stAppViewBlockContainer"] { 
+      padding-top: 0rem !important; 
+      margin-top: -15px !important; 
+  }
   .hero { padding: 24px 16px 20px; border-radius: 16px; }
   .hero-eyebrow { font-size: 0.6rem; padding: 4px 12px; }
   .hero-title { font-size: 2rem !important; white-space: nowrap; letter-spacing: -1px !important; }
@@ -795,7 +798,6 @@ def show_symptom_analyzer():
                       </div>
                   </div>
                   """, unsafe_allow_html=True)
-                  _time.sleep(1.0)
                   st.rerun()
               else:
                   st.session_state.voice_toast = None
