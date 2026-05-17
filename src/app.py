@@ -566,11 +566,13 @@ div[id^="viewerBadge"] { display: none !important; visibility: hidden !important
 
 /* ────────────────── Mobile Responsiveness Fixes ────────────────── */
 @media (max-width: 768px) {
-  [data-testid="block-container"], [data-testid="stAppViewBlockContainer"] { 
-      padding-top: 0rem !important; 
-      margin-top: -15px !important; 
+  .stApp [data-testid="stAppViewContainer"] > section > div, 
+  [data-testid="block-container"], 
+  [data-testid="stAppViewBlockContainer"] { 
+      padding-top: 0px !important; 
+      margin-top: -20px !important; 
   }
-  .hero { padding: 24px 16px 20px; border-radius: 16px; }
+  .hero { padding: 24px 16px 20px; border-radius: 16px; margin-top: 0px !important; }
   .hero-eyebrow { font-size: 0.6rem; padding: 4px 12px; }
   .hero-title { font-size: 2rem !important; white-space: nowrap; letter-spacing: -1px !important; }
   .hero-badge { padding: 5px 10px; font-size: 0.68rem; }
