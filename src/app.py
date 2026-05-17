@@ -106,13 +106,14 @@ html, body, [class*="css"] {
   background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
 }
 
-[data-testid="stHeader"]  { background: transparent !important; }
+[data-testid="stHeader"]  { background: transparent !important; display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
 [data-testid="stDecoration"] { display: none !important; }
 footer { visibility: hidden !important; display: none !important; }
-#MainMenu { visibility: hidden !important; }
-.viewerBadge_container__1QSob { display: none !important; }
-.viewerBadge_link__1S137 { display: none !important; }
+#MainMenu { visibility: hidden !important; display: none !important; }
+.stDeployButton { display: none !important; }
+div[class^="viewerBadge"] { display: none !important; visibility: hidden !important; opacity: 0 !important; z-index: -9999 !important; }
+div[id^="viewerBadge"] { display: none !important; visibility: hidden !important; }
 
 /* ────────────────── Scrollbar ────────────────── */
 ::-webkit-scrollbar       { width: 4px; }
