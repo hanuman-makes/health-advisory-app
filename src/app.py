@@ -724,38 +724,19 @@ def show_symptom_analyzer():
             st.rerun()
 
           st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-          st.slider(
-            "Recording length (seconds)",
-            min_value=3,
-            max_value=60,
-            value=st.session_state.get('voice_duration', 8),
-            key='voice_duration'
-          )
-          # Simple RMS-based auto-stop controls
-          st.checkbox("Auto-stop on silence", value=st.session_state.get('voice_autostop', True), key='voice_autostop')
-          if st.session_state.get('voice_autostop'):
-            st.slider("Silence sensitivity (lower = more sensitive)", min_value=100, max_value=2000, value=st.session_state.get('voice_silence_threshold', 700), key='voice_silence_threshold')
-            st.slider("Silence duration (seconds)", min_value=0.2, max_value=3.0, value=st.session_state.get('voice_silence_duration', 1.0), step=0.1, key='voice_silence_duration')
-          if st.button(get_label('voice_input', st.session_state.language), key="voice_btn"):
-            # Try importing sounddevice; show info if unavailable (cloud / no mic)
-            try:
-              from voice_input import get_voice_input
-              with st.spinner(get_label('listening', st.session_state.language)):
-                text = get_voice_input(
-                  st.session_state.voice_duration,
-                  st.session_state.get('voice_autostop', True),
-                  st.session_state.get('voice_silence_threshold', 700),
-                  float(st.session_state.get('voice_silence_duration', 1.0)),
-                )
-              _store_voice(text, "mic")
-            except Exception:
-              st.info(
-                "🎤 Microphone is not available in this environment. "
-                "Please use the file-upload option below to transcribe a voice recording.",
-                icon="ℹ️"
-              )
+          
+          # ── Native browser microphone (Streamlit 1.37+) ──────────────────
+          st.caption("Tap the microphone below to record your symptoms:")
+          audio_data = st.audio_input("Record symptoms", label_visibility="collapsed")
+          if audio_data:
+              audio_hash = hash(audio_data.getvalue())
+              if st.session_state.get("last_audio_hash") != audio_hash:
+                  st.session_state["last_audio_hash"] = audio_hash
+                  with st.spinner(get_label('transcribing', st.session_state.language)):
+                      text = get_voice_input_from_file(audio_data)
+                  _store_voice(text, "mic")
 
-          # ── Voice file upload ─────────────────────────────────────────────
+          # ── Voice file upload fallback ─────────────────────────────────────
           st.caption(get_label('voice_backup_caption', st.session_state.language))
           uploaded_audio = st.file_uploader(
               get_label('upload_voice', st.session_state.language),
