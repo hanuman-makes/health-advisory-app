@@ -1,0 +1,20 @@
+# MediSense — requirements.txt
+# Pin versions that are known to work together on Streamlit Cloud (Python 3.11)
+
+streamlit>=1.32.0
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+requests>=2.31.0
+SpeechRecognition>=3.10.0
+scipy>=1.11.0
+
+# googletrans 4.0.0rc1 is the last version that works without an API key.
+# NOTE: this package can be flaky; if translation fails the app falls back
+# to the built-in Hindi/Kannada dictionary in multilingualprocessor.py.
+googletrans==4.0.0-rc1
+
+# sounddevice is NOT listed here intentionally.
+# It requires a physical audio device which is unavailable on Streamlit Cloud.
+# voice_input.py handles its absence gracefully via try/except.
