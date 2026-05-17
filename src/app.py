@@ -92,9 +92,7 @@ html, body, [class*="css"] {
   font-family: 'DM Sans', sans-serif !important;
   background: var(--bg) !important;
   color: var(--text) !important;
-  overscroll-behavior-y: none !important;
 }
-[data-testid="stApp"] { overscroll-behavior-y: none !important; }
 
 /* ────────────────── App background — star field + grid ────────────────── */
 [data-testid="stAppViewContainer"] {
