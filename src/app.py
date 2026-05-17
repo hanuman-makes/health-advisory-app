@@ -568,6 +568,7 @@ div[id^="viewerBadge"] { display: none !important; visibility: hidden !important
 @media (max-width: 768px) {
   .hero { padding: 32px 20px 24px; border-radius: 20px; }
   .hero-eyebrow { font-size: 0.6rem; padding: 4px 12px; }
+  .hero-title { font-size: 2rem !important; white-space: nowrap; letter-spacing: -1px !important; }
   .hero-badge { padding: 5px 10px; font-size: 0.68rem; }
   .hero-badge-row { gap: 6px; }
   .sec-title { font-size: 1.25rem; }
