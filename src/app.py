@@ -109,6 +109,10 @@ html, body, [class*="css"] {
 [data-testid="stHeader"]  { background: transparent !important; }
 [data-testid="stToolbar"] { display: none !important; }
 [data-testid="stDecoration"] { display: none !important; }
+footer { visibility: hidden !important; display: none !important; }
+#MainMenu { visibility: hidden !important; }
+.viewerBadge_container__1QSob { display: none !important; }
+.viewerBadge_link__1S137 { display: none !important; }
 
 /* ────────────────── Scrollbar ────────────────── */
 ::-webkit-scrollbar       { width: 4px; }
