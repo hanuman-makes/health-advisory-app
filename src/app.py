@@ -26,6 +26,7 @@ FIXES (cloud-ready):
 import streamlit as st
 import os
 import sys
+import time as _time
 
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -707,168 +708,117 @@ def show_symptom_analyzer():
           # Update session language only if changed
           sel_code = lang_options.get(selected_lang, 'en')
 
-          # initialize prev language state for debugging
-          if '_prev_language' not in st.session_state:
-            st.session_state['_prev_language'] = st.session_state.get('language', 'en')
-          prev_lang = st.session_state.get('_prev_language')
-          # record change if different
-          if sel_code != prev_lang:
-            import time as _time
-            log = st.session_state.get('language_changes', [])
-            log.append({'ts': _time.time(), 'prev': prev_lang, 'new': sel_code})
-            st.session_state['language_changes'] = log
-            st.session_state['_prev_language'] = sel_code
           st.session_state.language = sel_code
 
-          # Dev-only: show recent language change events (helps reproduce swap bug)
-          with st.expander('Dev: language log (debug only)', expanded=False):
-            st.write('Current language code:', st.session_state.get('language'))
-            changes = st.session_state.get('language_changes', [])
-            if changes:
-              # show latest 10 entries with readable timestamps
-              import datetime as _dt
-              rows = []
-              for e in changes[-10:][::-1]:
-                rows.append({
-                  'time': _dt.datetime.fromtimestamp(e['ts']).isoformat(),
-                  'from': e['prev'],
-                  'to': e['new']
-                })
-              st.table(rows)
-            else:
-              st.write('No language changes recorded yet.')
+          # ── Voice mic button — graceful fallback on cloud ─────────────────
+          def _store_voice(text, source="mic"):
+            if not text:
+              st.warning(get_label('could_not_understand', st.session_state.language))
+              return
+            if text.startswith("Speech service unavailable") or text.startswith("An error occurred"):
+              st.warning(text)
+              return
+            prefix = "🎤 Captured" if source == "mic" else "🎤 Transcribed"
+            st.session_state.voice_fill = text
+            st.session_state.voice_toast = {'msg': f"{prefix}: {text}", 'ts': _time.time()}
+            st.rerun()
 
-        # Dev-only: show recent language change events (helps reproduce swap bug)
-        with st.expander('Dev: language log (debug only)', expanded=False):
-          st.write('Current language code:', st.session_state.get('language'))
-          changes = st.session_state.get('language_changes', [])
-          if changes:
-            # show latest 10 entries with readable timestamps
-            import datetime as _dt
-            rows = []
-            for e in changes[-10:][::-1]:
-              rows.append({
-                'time': _dt.datetime.fromtimestamp(e['ts']).isoformat(),
-                'from': e['prev'],
-                'to': e['new']
-              })
-            st.table(rows)
-          else:
-            st.write('No language changes recorded yet.')
-
-            import time as _time
-
-            def _store_voice(text, source="mic"):
-                if not text:
-                    st.warning(get_label('could_not_understand', st.session_state.language))
-                    return
-                if text.startswith("Speech service unavailable") or text.startswith("An error occurred"):
-                    st.warning(text)
-                    return
-                prefix = "🎤 Captured" if source == "mic" else "🎤 Transcribed"
-                st.session_state.voice_fill  = text
-                st.session_state.voice_toast = {'msg': f"{prefix}: {text}", 'ts': _time.time()}
-                st.rerun()
-
-            # ── Voice mic button — graceful fallback on cloud ─────────────────
-            v_col, _ = st.columns([1, 3])
-            with v_col:
-              # Recording length control
-              st.slider(
-                "Recording length (seconds)",
-                min_value=3,
-                max_value=60,
-                value=st.session_state.get('voice_duration', 8),
-                key='voice_duration'
+          st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+          st.slider(
+            "Recording length (seconds)",
+            min_value=3,
+            max_value=60,
+            value=st.session_state.get('voice_duration', 8),
+            key='voice_duration'
+          )
+          # Simple RMS-based auto-stop controls
+          st.checkbox("Auto-stop on silence", value=st.session_state.get('voice_autostop', True), key='voice_autostop')
+          if st.session_state.get('voice_autostop'):
+            st.slider("Silence sensitivity (lower = more sensitive)", min_value=100, max_value=2000, value=st.session_state.get('voice_silence_threshold', 700), key='voice_silence_threshold')
+            st.slider("Silence duration (seconds)", min_value=0.2, max_value=3.0, value=st.session_state.get('voice_silence_duration', 1.0), step=0.1, key='voice_silence_duration')
+          if st.button(get_label('voice_input', st.session_state.language), key="voice_btn"):
+            # Try importing sounddevice; show info if unavailable (cloud / no mic)
+            try:
+              from voice_input import get_voice_input
+              with st.spinner(get_label('listening', st.session_state.language)):
+                text = get_voice_input(
+                  st.session_state.voice_duration,
+                  st.session_state.get('voice_autostop', True),
+                  st.session_state.get('voice_silence_threshold', 700),
+                  float(st.session_state.get('voice_silence_duration', 1.0)),
+                )
+              _store_voice(text, "mic")
+            except Exception:
+              st.info(
+                "🎤 Microphone is not available in this environment. "
+                "Please use the file-upload option below to transcribe a voice recording.",
+                icon="ℹ️"
               )
-              # Simple RMS-based auto-stop controls
-              st.checkbox("Auto-stop on silence", value=st.session_state.get('voice_autostop', True), key='voice_autostop')
-              if st.session_state.get('voice_autostop'):
-                st.slider("Silence sensitivity (lower = more sensitive)", min_value=100, max_value=2000, value=st.session_state.get('voice_silence_threshold', 700), key='voice_silence_threshold')
-                st.slider("Silence duration (seconds)", min_value=0.2, max_value=3.0, value=st.session_state.get('voice_silence_duration', 1.0), step=0.1, key='voice_silence_duration')
-              if st.button(get_label('voice_input', st.session_state.language), key="voice_btn"):
-                # Try importing sounddevice; show info if unavailable (cloud / no mic)
-                try:
-                  from voice_input import get_voice_input
-                  with st.spinner(get_label('listening', st.session_state.language)):
-                    text = get_voice_input(
-                      st.session_state.voice_duration,
-                      st.session_state.get('voice_autostop', True),
-                      st.session_state.get('voice_silence_threshold', 700),
-                      float(st.session_state.get('voice_silence_duration', 1.0)),
-                    )
-                  _store_voice(text, "mic")
-                except Exception:
-                  st.info(
-                    "🎤 Microphone is not available in this environment. "
-                    "Please use the file-upload option below to transcribe a voice recording.",
-                    icon="ℹ️"
-                  )
 
-            # ── Voice file upload ─────────────────────────────────────────────
-            st.caption(get_label('voice_backup_caption', st.session_state.language))
-            uploaded_audio = st.file_uploader(
-                get_label('upload_voice', st.session_state.language),
-                type=["wav", "flac"],
-                key="voice_upload"
-            )
-            if uploaded_audio is not None:
-                if st.button(get_label('transcribe_btn', st.session_state.language), key="voice_upload_btn"):
-                    with st.spinner(get_label('transcribing', st.session_state.language)):
-                        text = get_voice_input_from_file(uploaded_audio)
-                    _store_voice(text, "file")
+          # ── Voice file upload ─────────────────────────────────────────────
+          st.caption(get_label('voice_backup_caption', st.session_state.language))
+          uploaded_audio = st.file_uploader(
+              get_label('upload_voice', st.session_state.language),
+              type=["wav", "flac"],
+              key="voice_upload"
+          )
+          if uploaded_audio is not None:
+              if st.button(get_label('transcribe_btn', st.session_state.language), key="voice_upload_btn"):
+                  with st.spinner(get_label('transcribing', st.session_state.language)):
+                      text = get_voice_input_from_file(uploaded_audio)
+                  _store_voice(text, "file")
 
-            # ── 5-second countdown toast ──────────────────────────────────────
-            TOAST_DURATION = 5.0
-            toast = st.session_state.voice_toast
-            if toast:
-                elapsed = _time.time() - toast['ts']
-                if elapsed < TOAST_DURATION:
-                    pct = max(0.0, 1.0 - elapsed / TOAST_DURATION)
-                    st.markdown(f"""
-                    <div style="
-                        background:linear-gradient(135deg,rgba(0,212,170,0.12),rgba(0,212,170,0.04));
-                        border:1px solid rgba(0,212,170,0.38);
-                        border-radius:14px; padding:12px 16px 8px; margin-bottom:10px;
-                    ">
-                        <div style="font-size:0.86rem;color:#00d4aa;font-weight:600;line-height:1.4;">
-                            ✅ {toast['msg']}
-                        </div>
-                        <div style="margin-top:8px;height:3px;
-                            background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
-                            <div style="height:100%;width:{pct*100:.1f}%;
-                                background:linear-gradient(90deg,#00d4aa,#4f8ef7);
-                                border-radius:2px;transition:width 0.95s linear;">
-                            </div>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    _time.sleep(1.0)
-                    st.rerun()
-                else:
-                    st.session_state.voice_toast = None
+          # ── 5-second countdown toast ──────────────────────────────────────
+          TOAST_DURATION = 5.0
+          toast = st.session_state.voice_toast
+          if toast:
+              elapsed = _time.time() - toast['ts']
+              if elapsed < TOAST_DURATION:
+                  pct = max(0.0, 1.0 - elapsed / TOAST_DURATION)
+                  st.markdown(f"""
+                  <div style="
+                      background:linear-gradient(135deg,rgba(0,212,170,0.12),rgba(0,212,170,0.04));
+                      border:1px solid rgba(0,212,170,0.38);
+                      border-radius:14px; padding:12px 16px 8px; margin-bottom:10px;
+                  ">
+                      <div style="font-size:0.86rem;color:#00d4aa;font-weight:600;line-height:1.4;">
+                          ✅ {toast['msg']}
+                      </div>
+                      <div style="margin-top:8px;height:3px;
+                          background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+                          <div style="height:100%;width:{pct*100:.1f}%;
+                              background:linear-gradient(90deg,#00d4aa,#4f8ef7);
+                              border-radius:2px;transition:width 0.95s linear;">
+                          </div>
+                      </div>
+                  </div>
+                  """, unsafe_allow_html=True)
+                  _time.sleep(1.0)
+                  st.rerun()
+              else:
+                  st.session_state.voice_toast = None
 
-            # ── Symptom textarea ──────────────────────────────────────────────
-            chip_text = ", ".join(
-                s.replace("_", " ") for s in sorted(st.session_state.selected_chips)
-            )
-            textarea_val = st.session_state.voice_fill or chip_text
+          # ── Symptom textarea ──────────────────────────────────────────────
+          chip_text = ", ".join(
+              s.replace("_", " ") for s in sorted(st.session_state.selected_chips)
+          )
+          textarea_val = st.session_state.voice_fill or chip_text
 
-            symptom_input = st.text_area(
-                get_label('describe_symptoms', st.session_state.language),
-                value=textarea_val,
-                height=130,
-                placeholder=get_label('placeholder_symptoms', st.session_state.language),
-            )
+          symptom_input = st.text_area(
+              get_label('describe_symptoms', st.session_state.language),
+              value=textarea_val,
+              height=130,
+              placeholder=get_label('placeholder_symptoms', st.session_state.language),
+          )
 
-            if st.button(get_label('analyze_btn', st.session_state.language), type="primary", key="analyze_btn"):
-                combined = symptom_input.strip() or chip_text.strip()
-                if combined:
-                    st.session_state.voice_toast = None
-                    st.session_state.voice_fill  = ''
-                    _run_analysis(combined)
-                else:
-                    st.warning(get_label('no_input', st.session_state.language))
+          if st.button(get_label('analyze_btn', st.session_state.language), type="primary", key="analyze_btn"):
+              combined = symptom_input.strip() or chip_text.strip()
+              if combined:
+                  st.session_state.voice_toast = None
+                  st.session_state.voice_fill  = ''
+                  _run_analysis(combined)
+              else:
+                  st.warning(get_label('no_input', st.session_state.language))
 
     # ── Right: clickable chip panel
     with col_right:
